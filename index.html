@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Aaru!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0d0515;
+            --fg: #fff5f5;
+            --muted: #9a8c9a;
+            --accent: #ff6b9d;
+            --accent2: #ffc857;
+            --card: rgba(255,255,255,0.06);
+            --border: rgba(255,255,255,0.1);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .font-pacifico { font-family: 'Pacifico', cursive; }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(255,107,157,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(255,200,87,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255,138,101,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        .screen.active {
+            display: flex;
+            animation: screenIn 0.7s cubic-bezier(0.22,1,0.36,1);
+        }
+        @keyframes screenIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 8px; height: 14px;
+            top: -20px;
+            z-index: 0;
+            border-radius: 2px;
+            animation: confettiFall linear infinite;
+            pointer-events: none;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg) scale(1); opacity: 0.9; }
+            80% { opacity: 0.7; }
+            100% { transform: translateY(105vh) rotate(720deg) scale(0.5); opacity: 0; }
+        }
+
+        .float-heart {
+            position: fixed;
+            color: var(--accent);
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 0;
+            animation: heartFloat linear infinite;
+        }
+        @keyframes heartFloat {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0.8); }
+            50% { opacity: 0.15; }
+            100% { transform: translateY(-120px) rotate(360deg) scale(1.2); opacity: 0; }
+        }
+
+        #game-canvas {
+            border-radius: 16px;
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 40px rgba(255,107,157,0.25), 0 0 80px rgba(255,107,157,0.1);
+            max-width: calc(100vw - 48px);
+            max-height: calc(100vh - 140px);
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 8px 8px 36px 8px;
+            border-radius: 3px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+            opacity: 0;
+            animation: polaroidIn 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+            animation-delay: var(--d, 0s);
+            transform: rotate(var(--r, 0deg));
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .polaroid:hover {
+            transform: rotate(0deg) scale(1.06) translateY(-8px) !important;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+        }
+        .polaroid img {
+            width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 1px;
+        }
+        .polaroid .cap {
+            color: #444;
+            font-family: 'Pacifico', cursive;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 6px;
+        }
+        @keyframes polaroidIn {
+            from { opacity: 0; transform: rotate(var(--r, 0deg)) scale(0.4) translateY(60px); }
+            to { opacity: 1; transform: rotate(var(--r, 0deg)) scale(1) translateY(0); }
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b9d, #ff8a65);
+            color: #fff;
+            border: none;
+            padding: 14px 40px;
+            font-size: 18px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 24px rgba(255,107,157,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+        .btn-primary:hover { transform: scale(1.08); box-shadow: 0 6px 32px rgba(255,107,157,0.6); }
+        .btn-primary:hover::after { transform: translateX(100%); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            color: var(--fg);
+            border: 2px solid rgba(255,255,255,0.15);
+            padding: 14px 36px;
+            font-size: 18px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.14); transform: scale(1.04); }
+
+        .btn-no {
+            background: rgba(255,255,255,0.08);
+            color: var(--fg);
+            border: 2px solid rgba(255,255,255,0.15);
+            padding: 14px 40px;
+            font-size: 18px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            position: fixed;
+            transition: left 0.25s cubic-bezier(0.22,1,0.36,1), top 0.25s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease, transform 0.4s ease;
+            transform-origin: center center;
+            user-select: none;
+            white-space: nowrap;
+            z-index: 50;
+        }
+
+        .burst-piece {
+            position: fixed;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 100;
+            animation: burstAnim 1.2s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+        }
+        @keyframes burstAnim {
+            0% { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) rotate(var(--tr)) scale(0.2); opacity: 0; }
+        }
+
+        .glow { text-shadow: 0 0 30px rgba(255,107,157,0.4), 0 0 60px rgba(255,107,157,0.15); }
+        .glow-gold { text-shadow: 0 0 30px rgba(255,200,87,0.4), 0 0 60px rgba(255,200,87,0.15); }
+
+        .bounce-slow { animation: bounceSlow 3s ease-in-out infinite; }
+        @keyframes bounceSlow {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .pulse-ring { animation: pulseRing 2s ease-in-out infinite; }
+        @keyframes pulseRing {
+            0%,100% { box-shadow: 0 0 0 0 rgba(255,107,157,0.4); }
+            50% { box-shadow: 0 0 0 20px rgba(255,107,157,0); }
+        }
+
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed; top: 24px; left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            background: linear-gradient(135deg, #ff6b9d, #ff8a65);
+            color: #fff; padding: 10px 24px; border-radius: 50px;
+            font-weight: 600; font-size: 14px; z-index: 200;
+            transition: transform 0.4s cubic-bezier(0.22,1,0.36,1);
+            box-shadow: 0 4px 24px rgba(255,107,157,0.4);
+            pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        .score-pop { animation: scorePop 0.3s ease; }
+        @keyframes scorePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); color: #ffc857; }
+            100% { transform: scale(1); }
+        }
+
+        .intro-star {
+            position: absolute;
+            width: 3px; height: 3px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: twinkle ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%,100% { opacity: 0.15; transform: scale(0.8); }
+            50% { opacity: 0.7; transform: scale(1.3); }
+        }
+
+        .celeb-word {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(40px) scale(0.5);
+            animation: celebWordIn 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+        }
+        @keyframes celebWordIn {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .celeb-glow-bar {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 200px;
+            background: linear-gradient(to top, rgba(255,107,157,0.12), transparent);
+            pointer-events: none;
+        }
+
+        .slide-line {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideLineIn 0.6s ease forwards;
+        }
+        @keyframes slideLineIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-btn {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: slideLineIn 0.5s ease forwards;
+            animation-delay: 0.6s;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<section id="loading-screen" class="screen active" aria-label="Loading">
+    <div class="flex flex-col items-center gap-6">
+        <div class="spinner"></div>
+        <p class="text-lg font-semibold opacity-70">Preparing your surprise...</p>
+    </div>
+</section>
+
+<section id="slide1-screen" class="screen" aria-label="Slide 1">
+    <div class="text-center relative z-10 max-w-md px-4">
+        <p class="slide-line text-2xl sm:text-3xl font-semibold leading-relaxed mb-2" style="color:var(--fg);">Hey Aaru,</p>
+        <p class="slide-line text-xl sm:text-2xl font-medium leading-relaxed opacity-80 mb-10" style="animation-delay:0.25s;">This isn't just a birthday wish...</p>
+        <button class="btn-primary slide-btn" onclick="switchScreen('slide1-screen','slide2-screen')">Continue <i class="fa-solid fa-arrow-right ml-2"></i></button>
+    </div>
+</section>
+
+<section id="slide2-screen" class="screen" aria-label="Slide 2">
+    <div class="text-center relative z-10 max-w-md px-4">
+        <p class="slide-line text-2xl sm:text-3xl font-medium leading-relaxed opacity-80">I thought of writing something normal...</p>
+    </div>
+</section>
+
+<section id="slide3-screen" class="screen" aria-label="Slide 3">
+    <div class="text-center relative z-10 max-w-md px-4">
+        <p class="slide-line text-2xl sm:text-3xl font-medium leading-relaxed opacity-80">But that didn't feel right for you...</p>
+    </div>
+</section>
+
+<section id="slide4-screen" class="screen" aria-label="Slide 4">
+    <div class="text-center relative z-10 max-w-md px-4">
+        <p class="slide-line text-2xl sm:text-3xl font-semibold leading-relaxed mb-2" style="color:var(--accent2);">Because you are not normal</p>
+        <p class="slide-line text-4xl mb-2" style="animation-delay:0.3s;">😄</p>
+    </div>
+</section>
+
+<section id="slide5-screen" class="screen" aria-label="Slide 5">
+    <div class="text-center relative z-10 max-w-md px-4">
+        <p class="slide-line text-2xl sm:text-3xl font-semibold leading-relaxed mb-10" style="color:var(--accent);">So I made something instead</p>
+        <button class="btn-primary slide-btn" onclick="goToGame()"><i class="fa-solid fa-gamepad mr-2"></i> Let's Go!</button>
+    </div>
+</section>
+
+<section id="game-screen" class="screen" aria-label="Birthday Game">
+    <div class="relative inline-block">
+        <canvas id="game-canvas" width="360" height="600" aria-label="Flappy bird style game"></canvas>
+        <div id="game-start-overlay" class="absolute inset-0 flex flex-col items-center justify-center rounded-2xl" style="background:rgba(13,5,21,0.55); backdrop-filter:blur(4px);">
+            <div class="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg mb-4" id="preview-bird"></div>
+            <p class="text-2xl font-bold mb-1" style="color:var(--accent);">Fly Aaru Fly!</p>
+            <p class="text-sm opacity-60 mb-1">Tap or press Space to fly</p>
+            <p class="text-xs opacity-40 mb-5">Collect golden photos for bonus points!</p>
+            <button class="btn-primary" onclick="startGame()" aria-label="Start game">Start</button>
+        </div>
+        <div id="game-over-overlay" class="absolute inset-0 hidden flex-col items-center justify-center rounded-2xl" style="background:rgba(13,5,21,0.7); backdrop-filter:blur(6px);">
+            <p class="text-4xl font-bold mb-2" id="result-text">Game Over</p>
+            <p class="text-lg opacity-70 mb-1" id="result-score">Score: 0</p>
+            <p class="text-sm opacity-50 mb-6" id="result-photos">Photos collected: 0</p>
+            <div class="flex gap-4 flex-wrap justify-center" id="game-over-buttons"></div>
+        </div>
+        <div id="game-hud" class="absolute top-3 left-0 right-0 text-center hidden pointer-events-none">
+            <span class="text-4xl font-bold inline-block" style="text-shadow:0 2px 12px rgba(0,0,0,0.6);" id="score-display">0</span>
+        </div>
+    </div>
+    <p class="text-xs opacity-30 mt-3" id="win-hint">Score 50 to win!</p>
+</section>
+
+<section id="collage-screen" class="screen" aria-label="Photo Memories">
+    <div class="text-center mb-8 relative z-10">
+        <h2 class="font-pacifico text-3xl sm:text-4xl glow mb-2" style="color:var(--accent);">Memories with Aaru</h2>
+        <p class="opacity-50 text-sm">Every picture tells a story</p>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 max-w-2xl w-full mb-10 relative z-10 px-2" id="collage-grid"></div>
+    <button class="btn-primary relative z-10" id="collage-continue-btn" style="opacity:0; transition:opacity 0.6s ease;" onclick="goToSurprise()" aria-label="Continue to surprise">One More Thing... <i class="fa-solid fa-arrow-right ml-2"></i></button>
+</section>
+
+<section id="surprise-screen" class="screen" aria-label="Surprise Question">
+    <div class="text-center relative z-10">
+        <div class="mb-6"><i class="fa-solid fa-gift text-5xl bounce-slow" style="color:var(--accent2);"></i></div>
+        <h2 class="font-pacifico text-3xl sm:text-4xl glow-gold mb-3" style="color:var(--accent2);">Did you like the surprise?</h2>
+        <p class="opacity-50 text-sm mb-16">Be honest now...</p>
+        <div class="flex items-center justify-center gap-8 sm:gap-12 mb-12" id="yes-no-row">
+            <button class="btn-primary text-xl" onclick="showCelebration()" aria-label="Yes I liked it" id="yes-btn"><i class="fa-solid fa-heart mr-2"></i> Yes!</button>
+            <button id="no-btn" class="btn-no" aria-label="No I didn't like it" style="position:fixed;">No</button>
+        </div>
+        <div class="h-10" id="no-placeholder"></div>
+    </div>
+</section>
+
+<section id="celebration-screen" class="screen" aria-label="Celebration">
+    <div class="celeb-glow-bar"></div>
+    <div class="text-center relative z-10">
+        <div class="text-7xl sm:text-9xl font-pacifico mb-4" style="color:var(--accent2);" id="yay-text"></div>
+        <h2 class="font-pacifico text-3xl sm:text-5xl glow mb-6" style="color:var(--accent); opacity:0; animation: celebWordIn 0.6s 0.6s cubic-bezier(0.22,1,0.36,1) forwards;">Happy Birthday Aaru!</h2>
+        <p class="text-lg sm:text-xl opacity-70 max-w-md mx-auto leading-relaxed mb-4" style="opacity:0; animation: celebWordIn 0.6s 1s cubic-bezier(0.22,1,0.36,1) forwards;">You deserve all the happiness in the world. Hope this little surprise made you smile!</p>
+        <p class="text-base opacity-50 mb-8" style="opacity:0; animation: celebWordIn 0.6s 1.3s cubic-bezier(0.22,1,0.36,1) forwards;">With love, from your bestie <i class="fa-solid fa-heart" style="color:var(--accent);"></i></p>
+        <div class="text-6xl bounce-slow mb-10" style="animation-delay:0.5s; opacity:0; animation: celebWordIn 0.6s 1.5s cubic-bezier(0.22,1,0.36,1) forwards, bounceSlow 3s 2.1s ease-in-out infinite;">
+            <i class="fa-solid fa-cake-candles" style="color:var(--accent2);"></i>
+        </div>
+        <button class="btn-secondary" style="opacity:0; animation: celebWordIn 0.6s 1.8s cubic-bezier(0.22,1,0.36,1) forwards;" onclick="goHome()" aria-label="Go back to start"><i class="fa-solid fa-rotate-left mr-2"></i> Start Again</button>
+    </div>
+</section>
+
+<script>
+const IMG_BIRD = './images/bird.png';
+const IMG_COLLECT = './images/heart.png';
+const IMG_COLLAGE = [
+     './pics/collage1.jpg',
+     './pics/collage2.jpg',
+     './pics/collage3.jpg',
+     './pics/collage4.jpg',
+     './pics/collage5.jpg',
+     './pics/collage6.jpg'
+];
+const COLLAGE_CAPTIONS = ['Birthday Queen', 'Smile Please!', 'Our Adventures', 'Bestie Goals', 'Unstoppable Duo', 'Forever Young'];
+
+let birdImg = null;
+let collectImg = null;
+let collageImgs = [];
+let allLoaded = false;
+let birdLoaded = false;
+let collectLoaded = false;
+
+const audioGame = new Audio('./music/song.mp3');
+audioGame.loop = true;
+audioGame.volume = 0.5;
+
+const audioLose = new Audio('./music/lose.mp3');
+audioLose.volume = 0.8;
+
+const audioWon = new Audio('./music/won.mp3');
+audioWon.volume = 0.8;
+
+function roundedRect(ctx, x, y, w, h, radii) {
+    const r = radii.map(v => Math.max(0, Math.min(v, Math.min(w, h) / 2)));
+    ctx.beginPath();
+    ctx.moveTo(x + r[0], y);
+    ctx.lineTo(x + w - r[1], y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r[1]);
+    ctx.lineTo(x + w, y + h - r[2]);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r[2], y + h);
+    ctx.lineTo(x + r[3], y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r[3]);
+    ctx.lineTo(x, y + r[0]);
+    ctx.quadraticCurveTo(x, y, x + r[0], y);
+    ctx.closePath();
+}
+
+function preloadImages() {
+    let loaded = 0;
+    const total = 2 + IMG_COLLAGE.length;
+
+    function onLoad() {
+        loaded++;
+        if (loaded >= total) {
+            allLoaded = true;
+            document.getElementById('loading-screen').classList.remove('active');
+            document.getElementById('slide1-screen').classList.add('active');
+            createConfetti();
+            createFloatingHearts();
+            createIntroStars();
+            const preview = document.getElementById('preview-bird');
+            preview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = IMG_BIRD;
+            img.alt = 'Aaru';
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+            preview.appendChild(img);
+        }
+    }
+
+    birdImg = new Image();
+    birdImg.onload = function() {
+        birdLoaded = true;
+        onLoad();
+    };
+    birdImg.onerror = function() {
+        birdLoaded = false;
+        onLoad();
+    };
+    birdImg.src = IMG_BIRD;
+
+    collectImg = new Image();
+    collectImg.onload = function() {
+        collectLoaded = true;
+        onLoad();
+    };
+    collectImg.onerror = function() {
+        collectLoaded = false;
+        onLoad();
+    };
+    collectImg.src = IMG_COLLECT;
+
+    IMG_COLLAGE.forEach((url) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.src = url;
+        collageImgs.push(img);
+        img.onload = onLoad;
+        img.onerror = onLoad;
+    });
+}
+preloadImages();
+
+function createConfetti() {
+    const colors = ['#ff6b9d','#ffc857','#ff8a65','#a8e6cf','#dcedc1','#ffd3b6','#ffaaa5'];
+    for (let i = 0; i < 35; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        el.style.left = Math.random() * 100 + '%';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.animationDuration = (4 + Math.random() * 6) + 's';
+        el.style.animationDelay = (Math.random() * 8) + 's';
+        el.style.width = (6 + Math.random() * 8) + 'px';
+        el.style.height = (8 + Math.random() * 12) + 'px';
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        document.body.appendChild(el);
+    }
+}
+
+function createFloatingHearts() {
+    for (let i = 0; i < 12; i++) {
+        const el = document.createElement('i');
+        el.className = 'fa-solid fa-heart float-heart';
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (12 + Math.random() * 20) + 'px';
+        el.style.animationDuration = (8 + Math.random() * 12) + 's';
+        el.style.animationDelay = (Math.random() * 10) + 's';
+        document.body.appendChild(el);
+    }
+}
+
+function createIntroStars() {
+    const slideIds = ['slide1-screen','slide2-screen','slide3-screen','slide4-screen','slide5-screen'];
+    slideIds.forEach(id => {
+        const container = document.getElementById(id);
+        for (let i = 0; i < 30; i++) {
+            const el = document.createElement('div');
+            el.className = 'intro-star';
+            el.style.left = Math.random() * 100 + '%';
+            el.style.top = Math.random() * 100 + '%';
+            el.style.animationDuration = (2 + Math.random() * 4) + 's';
+            el.style.animationDelay = (Math.random() * 3) + 's';
+            const size = (2 + Math.random() * 2) + 'px';
+            el.style.width = size;
+            el.style.height = size;
+            container.appendChild(el);
+        }
+    });
+}
+
+function switchScreen(fromId, toId) {
+    const from = document.getElementById(fromId);
+    const to = document.getElementById(toId);
+    from.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    from.style.opacity = '0';
+    from.style.transform = 'scale(0.96)';
+    setTimeout(() => {
+        from.classList.remove('active');
+        from.style.transition = '';
+        from.style.opacity = '';
+        from.style.transform = '';
+        to.classList.add('active');
+    }, 400);
+}
+
+function goHome() {
+    const screens = document.querySelectorAll('.screen.active');
+    screens.forEach(s => {
+        if (s.id !== 'slide1-screen') {
+            switchScreen(s.id, 'slide1-screen');
+        }
+    });
+}
+
+function goToGame() {
+    const current = document.querySelector('.screen.active');
+    const fromId = current ? current.id : 'slide5-screen';
+    switchScreen(fromId, 'game-screen');
+    setTimeout(() => {
+        initGameState();
+        startIdleLoop();
+    }, 420);
+}
+
+function goToCollage() {
+    cancelAnimationFrame(gameAnimId);
+    switchScreen('game-screen', 'collage-screen');
+    buildCollage();
+    setTimeout(() => {
+        document.getElementById('collage-continue-btn').style.opacity = '1';
+    }, 2800);
+}
+
+function goToSurprise() {
+    switchScreen('collage-screen', 'surprise-screen');
+    setTimeout(initNoButton, 420);
+}
+
+function showCelebration() {
+    const noBtn = document.getElementById('no-btn');
+    noBtn.style.display = 'none';
+    switchScreen('surprise-screen', 'celebration-screen');
+    const yayEl = document.getElementById('yay-text');
+    yayEl.innerHTML = '';
+    const text = 'Yayyy!';
+    text.split('').forEach((char, i) => {
+        const span = document.createElement('span');
+        span.className = 'celeb-word';
+        span.style.animationDelay = (i * 0.08) + 's';
+        span.textContent = char;
+        yayEl.appendChild(span);
+    });
+    setTimeout(createConfettiBurst, 300);
+    setTimeout(createConfettiBurst, 800);
+    setTimeout(createConfettiBurst, 1400);
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+const CW = 360, CH = 600;
+const GRAVITY = 0.2;
+const FLAP_FORCE = -4.8;
+const PIPE_SPEED = 1.5;
+const PIPE_GAP = 240;
+const PIPE_W = 55;
+const PIPE_INTERVAL = 130;
+const BIRD_R = 22;
+const COLLECT_R = 15;
+const WIN_SCORE = 50;
+
+let canvas, ctx;
+let bird, pipes, collectibles, particles;
+let score, collected, frameCount;
+let gameRunning, gameOver, gameWon;
+let gameAnimId;
+let idleAnimId;
+
+let clouds = [];
+for (let i = 0; i < 5; i++) {
+    clouds.push({
+        x: Math.random() * CW,
+        y: 40 + Math.random() * 200,
+        scale: 0.4 + Math.random() * 0.6,
+        speed: 0.15 + Math.random() * 0.3
+    });
+}
+
+function initGameState() {
+    canvas = document.getElementById('game-canvas');
+    ctx = canvas.getContext('2d');
+    bird = { x: 80, y: CH / 2, vy: 0, rotation: 0 };
+    pipes = [];
+    collectibles = [];
+    particles = [];
+    score = 0;
+    collected = 0;
+    frameCount = 0;
+    gameRunning = false;
+    gameOver = false;
+    gameWon = false;
+    document.getElementById('game-start-overlay').style.display = 'flex';
+    document.getElementById('game-over-overlay').style.display = 'none';
+    document.getElementById('game-hud').style.display = 'none';
+    const sd = document.getElementById('score-display');
+    sd.textContent = '0';
+    sd.classList.remove('score-pop');
+}
+
+function startIdleLoop() {
+    function idleFrame() {
+        frameCount++;
+        bird.y = CH / 2 + Math.sin(frameCount * 0.03) * 15;
+        bird.rotation = Math.sin(frameCount * 0.04) * 0.08;
+        drawGameFrame();
+        if (!gameRunning) {
+            idleAnimId = requestAnimationFrame(idleFrame);
+        }
+    }
+    idleFrame();
+}
+
+function startGame() {
+    cancelAnimationFrame(idleAnimId);
+    document.getElementById('game-start-overlay').style.display = 'none';
+    document.getElementById('game-hud').style.display = 'block';
+    bird.y = CH / 2;
+    bird.vy = 0;
+    bird.rotation = 0;
+    audioGame.currentTime = 0;
+    audioGame.play().catch(() => {});
+    gameRunning = true;
+    gameLoop();
+}
+
+function flap() {
+    if (!gameRunning || gameOver) return;
+    bird.vy = FLAP_FORCE;
+}
+
+function spawnPipe() {
+    const minTop = 70;
+    const maxTop = CH - PIPE_GAP - 70;
+    const topH = minTop + Math.random() * (maxTop - minTop);
+    pipes.push({ x: CW, topH: topH, passed: false });
+    if (Math.random() < 0.5) {
+        const gapCenter = topH + PIPE_GAP / 2;
+        collectibles.push({
+            x: CW + PIPE_W / 2,
+            y: gapCenter,
+            baseY: gapCenter,
+            alive: true,
+            bob: Math.random() * Math.PI * 2
+        });
+    }
+}
+
+function spawnParticles(x, y) {
+    const colors = ['#ffc857','#ff6b9d','#ff8a65','#fff'];
+    for (let i = 0; i < 14; i++) {
+        const angle = (Math.PI * 2 / 14) * i + Math.random() * 0.4;
+        const speed = 1.5 + Math.random() * 3;
+        particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 1.5,
+            life: 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: 2 + Math.random() * 4
+        });
+    }
+}
+
+function circleRect(cx, cy, cr, rx, ry, rw, rh) {
+    const nx = Math.max(rx, Math.min(cx, rx + rw));
+    const ny = Math.max(ry, Math.min(cy, ry + rh));
+    const dx = cx - nx, dy = cy - ny;
+    return (dx * dx + dy * dy) < (cr * cr);
+}
+
+function updateGame() {
+    if (!gameRunning || gameOver) return;
+    frameCount++;
+    bird.vy += GRAVITY;
+    bird.y += bird.vy;
+    bird.rotation = Math.max(-0.5, Math.min(bird.vy * 0.06, 1.2));
+    if (bird.y - BIRD_R < 0) {
+        bird.y = BIRD_R;
+        bird.vy = Math.max(0, bird.vy);
+    }
+    if (frameCount % PIPE_INTERVAL === 0) spawnPipe();
+    for (let i = pipes.length - 1; i >= 0; i--) {
+        pipes[i].x -= PIPE_SPEED;
+        if (!pipes[i].passed && pipes[i].x + PIPE_W < bird.x) {
+            pipes[i].passed = true;
+            score++;
+            popScore();
+            if (score >= WIN_SCORE) { gameWon = true; endGame(); return; }
+        }
+        if (pipes[i].x + PIPE_W < -10) pipes.splice(i, 1);
+    }
+    for (let i = collectibles.length - 1; i >= 0; i--) {
+        const c = collectibles[i];
+        c.x -= PIPE_SPEED;
+        c.y = c.baseY + Math.sin(frameCount * 0.04 + c.bob) * 12;
+        if (c.alive) {
+            const dx = bird.x - c.x, dy = bird.y - c.y;
+            if (Math.sqrt(dx * dx + dy * dy) < BIRD_R + COLLECT_R) {
+                c.alive = false;
+                score += 3;
+                collected++;
+                popScore();
+                spawnParticles(c.x, c.y);
+                showToast('+3 Bonus!');
+                if (score >= WIN_SCORE) { gameWon = true; endGame(); return; }
+            }
+        }
+        if (c.x < -20) collectibles.splice(i, 1);
+    }
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.06;
+        p.life -= 0.022;
+        if (p.life <= 0) particles.splice(i, 1);
+    }
+    for (const pipe of pipes) {
+        if (circleRect(bird.x, bird.y, BIRD_R, pipe.x, 0, PIPE_W, pipe.topH) ||
+            circleRect(bird.x, bird.y, BIRD_R, pipe.x, pipe.topH + PIPE_GAP, PIPE_W, CH)) {
+            endGame(); return;
+        }
+    }
+    if (bird.y + BIRD_R > CH) { endGame(); return; }
+}
+
+function popScore() {
+    const sd = document.getElementById('score-display');
+    sd.textContent = score;
+    sd.classList.remove('score-pop');
+    void sd.offsetWidth;
+    sd.classList.add('score-pop');
+}
+
+function endGame() {
+    gameRunning = false;
+    gameOver = true;
+    audioGame.pause();
+    audioGame.currentTime = 0;
+    setTimeout(() => {
+        if (gameWon) {
+            audioWon.currentTime = 0;
+            audioWon.play().catch(() => {});
+        } else {
+            audioLose.currentTime = 0;
+            audioLose.play().catch(() => {});
+        }
+    }, 100);
+    const ov = document.getElementById('game-over-overlay');
+    ov.style.display = 'flex';
+    const rt = document.getElementById('result-text');
+    const btnContainer = document.getElementById('game-over-buttons');
+    btnContainer.innerHTML = '';
+    if (gameWon) {
+        rt.textContent = 'You Won!';
+        rt.style.color = '#ffc857';
+        const btn = document.createElement('button');
+        btn.className = 'btn-primary';
+        btn.innerHTML = 'Check Your Reward <i class="fa-solid fa-gift ml-2"></i>';
+        btn.onclick = goToCollage;
+        btnContainer.appendChild(btn);
+    } else {
+        rt.textContent = 'Game Over';
+        rt.style.color = '#ff6b9d';
+        const btnReplay = document.createElement('button');
+        btnReplay.className = 'btn-primary';
+        btnReplay.innerHTML = '<i class="fa-solid fa-rotate-right mr-2"></i> Play Again';
+        btnReplay.onclick = replayGame;
+        btnContainer.appendChild(btnReplay);
+        const btnContinue = document.createElement('button');
+        btnContinue.className = 'btn-secondary';
+        btnContinue.innerHTML = 'Continue <i class="fa-solid fa-arrow-right ml-2"></i>';
+        btnContinue.onclick = goToCollage;
+        btnContainer.appendChild(btnContinue);
+    }
+    document.getElementById('result-score').textContent = 'Score: ' + score;
+    document.getElementById('result-photos').textContent = 'Photos collected: ' + collected;
+}
+
+function replayGame() {
+    audioLose.pause();
+    audioLose.currentTime = 0;
+    audioWon.pause();
+    audioWon.currentTime = 0;
+    document.getElementById('game-over-overlay').style.display = 'none';
+    document.getElementById('game-hud').style.display = 'none';
+    bird = { x: 80, y: CH / 2, vy: 0, rotation: 0 };
+    pipes = [];
+    collectibles = [];
+    particles = [];
+    score = 0;
+    collected = 0;
+    frameCount = 0;
+    gameRunning = false;
+    gameOver = false;
+    gameWon = false;
+    const sd = document.getElementById('score-display');
+    sd.textContent = '0';
+    sd.classList.remove('score-pop');
+    document.getElementById('game-start-overlay').style.display = 'flex';
+    startIdleLoop();
+}
+
+function drawGameFrame() {
+    if (!ctx) return;
+    const bg = ctx.createLinearGradient(0, 0, 0, CH);
+    bg.addColorStop(0, '#fce4ec');
+    bg.addColorStop(0.4, '#f8bbd0');
+    bg.addColorStop(0.8, '#e1bee7');
+    bg.addColorStop(1, '#d1c4e9');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = 'rgba(255,235,59,0.18)';
+    ctx.beginPath();
+    ctx.arc(CW - 50, 60, 40, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,235,59,0.3)';
+    ctx.beginPath();
+    ctx.arc(CW - 50, 60, 25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    for (const c of clouds) {
+        drawCloud(ctx, c.x, c.y, c.scale);
+        if (gameRunning && !gameOver) c.x -= c.speed;
+        else if (!gameRunning) c.x -= c.speed * 0.3;
+        if (c.x < -80) c.x = CW + 80;
+    }
+    for (const p of pipes) drawPipe(ctx, p);
+    for (const c of collectibles) {
+        if (c.alive) drawCollectible(ctx, c);
+    }
+    for (const p of particles) {
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(0.5, p.size * p.life), 0, Math.PI * 2);
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    drawBird(ctx);
+}
+
+function drawCloud(ctx, x, y, s) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(s, s);
+    ctx.beginPath();
+    ctx.arc(0, 0, 22, 0, Math.PI * 2);
+    ctx.arc(22, -4, 18, 0, Math.PI * 2);
+    ctx.arc(-22, -4, 18, 0, Math.PI * 2);
+    ctx.arc(10, -14, 15, 0, Math.PI * 2);
+    ctx.arc(-10, -14, 15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawPipe(ctx, pipe) {
+    const grad = ctx.createLinearGradient(pipe.x, 0, pipe.x + PIPE_W, 0);
+    grad.addColorStop(0, '#4db6ac');
+    grad.addColorStop(0.3, '#80cbc4');
+    grad.addColorStop(0.7, '#80cbc4');
+    grad.addColorStop(1, '#4db6ac');
+    ctx.fillStyle = grad;
+    ctx.fillRect(pipe.x, 0, PIPE_W, pipe.topH - 18);
+    ctx.fillStyle = '#26a69a';
+    roundedRect(ctx, pipe.x - 4, pipe.topH - 22, PIPE_W + 8, 22, [0, 0, 6, 6]);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(pipe.x - 2, pipe.topH - 20, PIPE_W + 4, 3);
+    const bY = pipe.topH + PIPE_GAP + 18;
+    ctx.fillStyle = grad;
+    ctx.fillRect(pipe.x, bY, PIPE_W, CH - bY);
+    ctx.fillStyle = '#26a69a';
+    roundedRect(ctx, pipe.x - 4, pipe.topH + PIPE_GAP, PIPE_W + 8, 22, [6, 6, 0, 0]);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fillRect(pipe.x - 2, pipe.topH + PIPE_GAP + 2, PIPE_W + 4, 3);
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.fillRect(pipe.x + 6, 0, 4, pipe.topH - 18);
+    ctx.fillRect(pipe.x + 6, bY, 4, CH - bY);
+    ctx.fillStyle = 'rgba(0,0,0,0.06)';
+    ctx.fillRect(pipe.x + PIPE_W - 8, 0, 4, pipe.topH - 18);
+    ctx.fillRect(pipe.x + PIPE_W - 8, bY, 4, CH - bY);
+}
+
+function drawBird(ctx) {
+    ctx.save();
+    ctx.translate(bird.x, bird.y);
+    ctx.rotate(bird.rotation || 0);
+    ctx.shadowColor = '#ff6b9d';
+    ctx.shadowBlur = 18;
+    ctx.beginPath();
+    ctx.arc(0, 0, BIRD_R, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.save();
+    ctx.clip();
+    if (birdLoaded && birdImg && birdImg.naturalWidth > 0) {
+        const imgW = birdImg.naturalWidth;
+        const imgH = birdImg.naturalHeight;
+        const scale = (BIRD_R * 2) / Math.min(imgW, imgH);
+        const drawW = imgW * scale;
+        const drawH = imgH * scale;
+        ctx.drawImage(birdImg, -drawW / 2, -drawH / 2, drawW, drawH);
+    } else {
+        ctx.fillStyle = '#ff6b9d';
+        ctx.fillRect(-BIRD_R, -BIRD_R, BIRD_R * 2, BIRD_R * 2);
+    }
+    ctx.restore();
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(0, 0, BIRD_R, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    const wingFlap = Math.sin((frameCount || 0) * 0.15) * 6;
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.beginPath();
+    ctx.ellipse(-BIRD_R + 2, -2 + wingFlap, 9, 6, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(8, -5, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawCollectible(ctx, c) {
+    const pulse = 1 + Math.sin((frameCount || 0) * 0.08 + c.bob) * 0.12;
+    const r = COLLECT_R * pulse;
+    ctx.strokeStyle = 'rgba(255,200,87,0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, r + 6, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate((frameCount || 0) * 0.03);
+    ctx.strokeStyle = 'rgba(255,200,87,0.2)';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 4; i++) {
+        const a = (Math.PI / 2) * i;
+        ctx.beginPath();
+        ctx.arc(0, 0, r + 10, a, a + 0.4);
+        ctx.stroke();
+    }
+    ctx.restore();
+    ctx.shadowColor = '#ffc857';
+    ctx.shadowBlur = 14;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, Math.max(1, r), 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+    if (collectLoaded && collectImg && collectImg.naturalWidth > 0) {
+        const imgW = collectImg.naturalWidth;
+        const imgH = collectImg.naturalHeight;
+        const scale = (r * 2) / Math.min(imgW, imgH);
+        const drawW = imgW * scale;
+        const drawH = imgH * scale;
+        ctx.drawImage(collectImg, c.x - drawW / 2, c.y - drawH / 2, drawW, drawH);
+    } else {
+        ctx.fillStyle = '#ffc857';
+        ctx.fillRect(c.x - r, c.y - r, r * 2, r * 2);
+    }
+    ctx.restore();
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, Math.max(1, r), 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffc857';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    const sp = (Math.sin((frameCount || 0) * 0.12 + c.bob) + 1) * 0.5;
+    ctx.globalAlpha = sp * 0.8;
+    ctx.beginPath();
+    ctx.arc(c.x + r * 0.6, c.y - r * 0.6, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+}
+
+function gameLoop() {
+    updateGame();
+    drawGameFrame();
+    if (gameRunning) {
+        gameAnimId = requestAnimationFrame(gameLoop);
+    } else if (gameOver) {
+        drawGameFrame();
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        flap();
+    }
+});
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'game-canvas') { e.preventDefault(); flap(); }
+});
+document.addEventListener('touchstart', (e) => {
+    if (e.target.id === 'game-canvas') { e.preventDefault(); flap(); }
+}, { passive: false });
+
+let slideTimers = {};
+function setupSlideAutoAdvance() {
+    const slideMap = {
+        'slide2-screen': 'slide3-screen',
+        'slide3-screen': 'slide4-screen',
+        'slide4-screen': 'slide5-screen'
+    };
+    Object.keys(slideMap).forEach(fromId => {
+        const toId = slideMap[fromId];
+        const el = document.getElementById(fromId);
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((m) => {
+                if (m.attributeName === 'class' && el.classList.contains('active')) {
+                    clearTimeout(slideTimers[fromId]);
+                    slideTimers[fromId] = setTimeout(() => {
+                        switchScreen(fromId, toId);
+                    }, 2200);
+                } else if (m.attributeName === 'class' && !el.classList.contains('active')) {
+                    clearTimeout(slideTimers[fromId]);
+                }
+            });
+        });
+        observer.observe(el, { attributes: true });
+    });
+}
+setupSlideAutoAdvance();
+
+function buildCollage() {
+    const grid = document.getElementById('collage-grid');
+    grid.innerHTML = '';
+    const rotations = [-4, 3, -2, 4, -3, 2];
+    IMG_COLLAGE.forEach((url, i) => {
+        const card = document.createElement('div');
+        card.className = 'polaroid';
+        card.style.setProperty('--d', (i * 0.4) + 's');
+        card.style.setProperty('--r', rotations[i] + 'deg');
+        card.style.width = '100%';
+        card.style.aspectRatio = '4/5';
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = COLLAGE_CAPTIONS[i];
+        img.loading = 'eager';
+        const cap = document.createElement('div');
+        cap.className = 'cap';
+        cap.textContent = COLLAGE_CAPTIONS[i];
+        card.appendChild(img);
+        card.appendChild(cap);
+        grid.appendChild(card);
+    });
+}
+
+const NO_TEXTS = ['No', 'Are you sure?', 'Really sure?', 'Think again!', 'Pretty please?', 'Come on...'];
+let noCount = 0;
+let noInitialPos = null;
+
+function initNoButton() {
+    noCount = 0;
+    const btn = document.getElementById('no-btn');
+    const yesBtn = document.getElementById('yes-btn');
+    const row = document.getElementById('yes-no-row');
+    const yesRect = yesBtn.getBoundingClientRect();
+    noInitialPos = {
+        left: yesRect.right + 24,
+        top: yesRect.top
+    };
+    btn.textContent = NO_TEXTS[0];
+    btn.style.opacity = '1';
+    btn.style.display = 'block';
+    btn.style.position = 'fixed';
+    btn.style.left = noInitialPos.left + 'px';
+    btn.style.top = noInitialPos.top + 'px';
+    btn.style.transform = 'scale(1)';
+    btn.onmouseenter = dodgeNo;
+    btn.ontouchstart = function(e) { e.preventDefault(); dodgeNo(); };
+    btn.onclick = function(e) { e.preventDefault(); dodgeNo(); };
+}
+
+function dodgeNo() {
+    noCount++;
+    const btn = document.getElementById('no-btn');
+    const yesBtn = document.getElementById('yes-btn');
+    const yesRect = yesBtn.getBoundingClientRect();
+    const btnW = btn.offsetWidth;
+    const btnH = btn.offsetHeight;
+    if (noCount >= NO_TEXTS.length) {
+        btn.style.transition = 'all 0.5s cubic-bezier(0.22,1,0.36,1)';
+        btn.style.left = '-200px';
+        btn.style.top = '-200px';
+        btn.style.transform = 'scale(0.2) rotate(45deg)';
+        btn.style.opacity = '0';
+        setTimeout(() => { btn.style.display = 'none'; }, 500);
+        showToast('There was only one choice anyway!');
+        return;
+    }
+    btn.textContent = NO_TEXTS[noCount];
+    btn.style.opacity = Math.max(0.2, 1 - noCount * 0.15);
+    btn.style.transform = 'scale(' + Math.max(0.6, 1 - noCount * 0.08) + ')';
+    const padding = 30;
+    const safeLeft = yesRect.left - btnW - padding;
+    const safeRight = yesRect.right + padding;
+    const safeTop = yesRect.top - btnH - padding;
+    const safeBottom = yesRect.bottom + padding;
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    const margin = 10;
+    let newX, newY, attempts = 0;
+    do {
+        newX = margin + Math.random() * (screenW - btnW - margin * 2);
+        newY = margin + Math.random() * (screenH - btnH - margin * 2);
+        attempts++;
+    } while (
+        attempts < 50 &&
+        newX + btnW > safeLeft &&
+        newX < safeRight &&
+        newY + btnH > safeTop &&
+        newY < safeBottom
+    );
+    btn.style.left = newX + 'px';
+    btn.style.top = newY + 'px';
+}
+
+function createConfettiBurst() {
+    const colors = ['#ff6b9d','#ffc857','#ff8a65','#a8e6cf','#dcedc1','#ffd3b6','#ffaaa5','#c3aed6'];
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    for (let i = 0; i < 60; i++) {
+        const el = document.createElement('div');
+        el.className = 'burst-piece';
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 120 + Math.random() * 450;
+        el.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+        el.style.setProperty('--ty', Math.sin(angle) * dist - 80 + 'px');
+        el.style.setProperty('--tr', (Math.random() * 720 - 360) + 'deg');
+        el.style.left = cx + 'px';
+        el.style.top = cy + 'px';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        const shape = Math.random();
+        if (shape < 0.33) {
+            el.style.width = (6 + Math.random() * 8) + 'px';
+            el.style.height = (6 + Math.random() * 8) + 'px';
+            el.style.borderRadius = '50%';
+        } else if (shape < 0.66) {
+            el.style.width = (4 + Math.random() * 6) + 'px';
+            el.style.height = (12 + Math.random() * 16) + 'px';
+            el.style.borderRadius = '2px';
+        } else {
+            el.style.width = (8 + Math.random() * 10) + 'px';
+            el.style.height = (8 + Math.random() * 10) + 'px';
+            el.style.borderRadius = '2px';
+        }
+        el.style.animationDelay = (Math.random() * 0.25) + 's';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1800);
+    }
+}
+</script>
+</body>
+</html>
